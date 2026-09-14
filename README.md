@@ -14,6 +14,96 @@
 - 同时代理普通 HTTP 请求和 DSH WebSocket 事件流
 - 不修改 DSH 自带的 `webserver` 或 `connection` 配置
 
+## 插件界面与使用体验
+
+安装并重启 DSH 后，进入：
+
+**设置 → 插件 → 插件配置 → LAN Link**
+
+设置卡片大致如下：
+
+```text
+LAN Link                                      ● Running / ○ Stopped
+
+通过持久化令牌网关，让局域网设备访问当前 DSH Web。
+
+┌─────────────────────────────── 风险提示 ──┐
+│ 获得完整链接的人将拥有 DSH 控制权限。      │
+│ HTTP 不加密，请仅在可信私有局域网使用。    │
+└────────────────────────────────────────────┘
+
+☑ Enable persistent LAN access
+
+Gateway port  [ 3081 ]  [Save port]
+                         [Rotate token] [Refresh]
+
+Authorized LAN links
+http://192.168.1.10:3081/?token=xxxx...  [Copy]
+http://10.0.0.8:3081/?token=xxxx...       [Copy]
+
+Local verification link
+http://127.0.0.1:3081/?token=xxxx...
+```
+
+### 开启访问
+
+勾选 **Enable persistent LAN access** 后，插件会：
+
+1. 首次自动生成 256-bit 随机 token；
+2. 持久保存开关、端口和 token；
+3. 默认监听 `0.0.0.0:3081`；
+4. 自动识别可用的 LAN IPv4 地址；
+5. 在设置卡片中显示完整授权链接。
+
+### 远端设备首次访问
+
+在同一局域网的电脑或手机上打开完整链接：
+
+```text
+http://192.168.1.10:3081/?token=<完整令牌>
+```
+
+网关验证 token 后会写入一个有效期 30 天的 HttpOnly Cookie，并跳转到不带 token 的首页。之后同一浏览器可以直接访问：
+
+```text
+http://192.168.1.10:3081/
+```
+
+只要 Cookie 未清除或过期、插件仍为开启状态、DSH 正在运行且 token 未换发，就不需要再次输入完整链接。
+
+### 跨 DSH 重启
+
+插件不是脱离 DSH 独立运行的 Windows 服务；DSH 退出时网关也会关闭。但设置是持久的：
+
+- 开关保持开启时，下一次启动 DSH 会自动恢复网关；
+- 恢复时继续使用同一端口和 token；
+- 原授权链接仍然有效；
+- 远端浏览器中未过期的 Cookie 仍然有效。
+
+因此正常使用时只需开启一次，不需要每次启动都重新生成链接。
+
+### 管理操作
+
+- **Save port**：保存新端口并立即重启网关；token 不变，旧端口停止服务。
+- **Rotate token**：生成新 token；旧链接和旧 Cookie 立即失效。
+- **Refresh**：重新读取运行状态和本机 LAN 地址。
+- **取消开启开关**：立即停止 LAN 监听；token 仍保留，下次开启默认继续使用。
+- 若希望关闭后让所有旧链接永久失效，请在重新开启后执行一次 **Rotate token**。
+
+### 网络路径
+
+```text
+局域网浏览器
+    │  http://LAN-IP:3081 + token / Cookie
+    ▼
+dsh-lan-link 令牌网关
+    │  认证、同源检查、Host/Origin 改写
+    ▼
+127.0.0.1:3080 的原始 DSH Web
+```
+
+LAN 侧不能访问插件自己的 `/lan-link/*` 控制 RPC；修改开关、端口和换发 token 只允许在宿主机的 loopback 设置页面操作。
+
 ## ⚠️ 安全风险
 
 启用前请明确理解：
@@ -23,8 +113,9 @@
 3. **默认使用普通 HTTP。** token、Cookie 和会话内容不会被 TLS 加密；同一不可信网络中的监听者可能窃取它们。
 4. **仅限可信私有局域网。** 不要做公网端口映射，不要暴露到公司访客网、公共 Wi‑Fi 或不受信任 VLAN。
 5. Windows 防火墙可能在首次监听时弹出授权；只允许“专用网络”，不要允许“公用网络”。
+6. token 用户拥有完整 DSH 使用能力，而不是只读权限；应把完整链接视为密码。
 
-如果链接可能泄露，请立即点击 **Rotate token**；如果不需要远程访问，请关闭开关。
+如果链接可能泄露，请立即点击 **Rotate token**；如果不需要远程访问，请关闭开关。跨公网或不可信网络使用时，请优先选择 Tailscale、WireGuard、SSH 隧道或带 HTTPS 的反向代理。
 
 ## 安装
 
