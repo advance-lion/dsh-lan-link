@@ -1,0 +1,8 @@
+node_modules/
+*.tgz
+.DS_Store
+coverage/
+.npm-cache/
+.test-dsh-home/
+.test-*.txt
+tests/e2e-client.mjs

@@ -1,0 +1,4 @@
+# Add the LAN Link host plugin. Its browser half is discovered from ./client.
+- insert:
+    - id: lan-link
+      name: dsh-lan-link
