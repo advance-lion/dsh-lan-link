@@ -46,14 +46,15 @@ dsh plugin --profile web remove dsh-lan-link
 
 1. **Enable LAN access after restart**：保存是否允许 LAN 访问；
 2. **DSH Web port**：保存下次启动使用的 Web 端口，默认 `3080`；
-3. 当前实际绑定地址与端口；
-4. 是否需要重启；
-5. DSH 原生的完整 token 授权链接；
-6. 安全风险提示。
+3. **Authorization lifetime (days)**：设置授权 Cookie 有效期，默认 `30` 天，可设 `1–3650` 天；
+4. 当前实际绑定地址与端口；
+5. 是否需要重启；
+6. DSH 原生的完整 token 授权链接；
+7. 安全风险提示。
 
 ### 为什么修改后要重启
 
-DSH 0.1.5 的 WebServer 在进程启动时绑定监听地址，不能在运行中把 `127.0.0.1` 安全热切换为 `0.0.0.0`。因此开关和端口使用 `applies: restart`：设置立即持久化，但重启 `dsh web` 后生效。
+DSH 0.1.5 的 WebServer 和 BrowserAuth 在进程启动时读取配置：监听地址不能在运行中把 `127.0.0.1` 安全热切换为 `0.0.0.0`，Cookie 有效期也在 BrowserAuth 初始化时确定。因此开关、端口和授权天数使用 `applies: restart`：设置立即持久化，但重启 `dsh web` 后生效。授权天数的修改只影响重启后新签发的 Cookie，不会追溯改变已签发 Cookie 的到期时间。
 
 - 关闭：绑定 `127.0.0.1`，仅本机访问；
 - 开启：绑定 `0.0.0.0`，由 DSH Web Runtime 自动发现 LAN IPv4 并加入 `trustedHosts`；
