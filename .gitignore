@@ -4,5 +4,7 @@ node_modules/
 coverage/
 .npm-cache/
 .test-dsh-home/
+.compat-test-home/
 .test-*.txt
 tests/e2e-client.mjs
+tests/compat-e2e.mjs

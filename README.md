@@ -117,6 +117,23 @@ LAN 侧不能访问插件自己的 `/lan-link/*` 控制 RPC；修改开关、端
 
 如果链接可能泄露，请立即点击 **Rotate token**；如果不需要远程访问，请关闭开关。跨公网或不可信网络使用时，请优先选择 Tailscale、WireGuard、SSH 隧道或带 HTTPS 的反向代理。
 
+## 版本兼容性
+
+当前 `0.1.x` 分支专门面向并测试于：
+
+- DeepSeek Harness CLI：`0.1.1-rc.2`
+- DSH Client/Host 公共插件接口：`0.1.1-rc.2`
+- Node.js：`>=22.19.0`
+
+`package.json` 使用精确的 `dsh.engines.dsh` 和 DSH peer 版本，避免 pnpm 自动解析到 `0.1.2-alpha/rc` 系列。插件不依赖新版原生 `launchToken`，令牌认证由自身网关完成。
+
+安装前可以确认当前版本：
+
+```powershell
+dsh --version
+# 预期：0.1.1-rc.2
+```
+
 ## 安装
 
 从 GitHub checkout 安装到 Web profile：
