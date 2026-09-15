@@ -48,9 +48,11 @@ dsh plugin --profile web remove dsh-lan-link
 2. **DSH Web port**：保存下次启动使用的 Web 端口，默认 `3080`；
 3. **Authorization lifetime (days)**：设置授权 Cookie 有效期，默认 `30` 天，可设 `1–3650` 天；
 4. 当前实际绑定地址与端口；
-5. 是否需要重启；
+5. 是否需要重启，以及本机可用的 **Save and restart DSH** 一键重启按钮；
 6. DSH 原生的完整 token 授权链接；
 7. 安全风险提示。
+
+一键重启复用当前 profile 已安装的 DSH Market 安全重启端点：它重放当前 DSH 的入口、参数、环境与工作目录，并等待端口释放后拉起新进程。端点只接受本机同源请求；通过 LAN 打开的远程页面不能重启主机进程。点击前会确认，并提示当前模型响应和后台任务会被中断。若 profile 未安装或已禁用 `dshmarket`，按钮会显示端点返回的错误，此时需手工重启。
 
 ### 为什么修改后要重启
 

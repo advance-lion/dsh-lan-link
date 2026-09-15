@@ -1,6 +1,6 @@
 {
   "name": "dsh-lan-link",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Persistent token-gated LAN access for DeepSeek Harness Web",
   "homepage": "https://github.com/advance-lion/dsh-lan-link#readme",
   "repository": {
