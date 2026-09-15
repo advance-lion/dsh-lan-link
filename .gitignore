@@ -5,6 +5,10 @@ coverage/
 .npm-cache/
 .test-dsh-home/
 .compat-test-home/
+.rc15-test-home/
+.rc15-dump.txt
 .test-*.txt
 tests/e2e-client.mjs
 tests/compat-e2e.mjs
+tests/native-auth-e2e.mjs
+.rc15-cookie.txt

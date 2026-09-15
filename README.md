@@ -1,142 +1,26 @@
 # dsh-lan-link
 
-为 DeepSeek Harness Web 提供**可持久化、令牌保护的局域网访问**。
+为 DeepSeek Harness Web 提供可持久开启的局域网访问入口，面向当前 **DSH `0.1.5-rc.1`**。
 
-插件不会直接把 DSH 的原始 Web 端口暴露到局域网，而是在另一个端口上启动 HTTP/WebSocket 网关：访问完整的 `?token=...` 链接后，网关写入 30 天的 HttpOnly Cookie，并把已授权流量转发到本机 DSH。
+插件不实现第二套反向代理或自定义认证，而是配置并展示 DSH 0.1.5 自带的：
 
-## 功能
+- `0.0.0.0` WebServer LAN 监听；
+- LAN IP `trustedHosts` 信任栅栏；
+- 每进程随机 launch token；
+- token 首次访问后签发的 HttpOnly Cookie；
+- 默认 30 天、可跨 DSH 重启复用的签名浏览器会话。
 
-- 在 **设置 → 插件 → 插件配置 → LAN Link** 中手动开启或关闭
-- `enabled`、端口和随机 token 由 DSH Settings 持久化
-- 开关保持开启时，DSH 重启后自动恢复相同端口和 token，原链接继续有效
-- 设置卡片显示所有检测到的 IPv4 LAN 链接并支持复制
-- 一键换发 token；换发后旧链接和旧 Cookie 立即失效
-- 同时代理普通 HTTP 请求和 DSH WebSocket 事件流
-- 不修改 DSH 自带的 `webserver` 或 `connection` 配置
+## 兼容版本
 
-## 插件界面与使用体验
+| 项目 | 版本 |
+| --- | --- |
+| DeepSeek Harness CLI | `0.1.5-rc.1` |
+| 插件 | `0.2.0` |
+| Node.js | `>=22.19.0` |
 
-安装并重启 DSH 后，进入：
-
-**设置 → 插件 → 插件配置 → LAN Link**
-
-设置卡片大致如下：
-
-```text
-LAN Link                                      ● Running / ○ Stopped
-
-通过持久化令牌网关，让局域网设备访问当前 DSH Web。
-
-┌─────────────────────────────── 风险提示 ──┐
-│ 获得完整链接的人将拥有 DSH 控制权限。      │
-│ HTTP 不加密，请仅在可信私有局域网使用。    │
-└────────────────────────────────────────────┘
-
-☑ Enable persistent LAN access
-
-Gateway port  [ 3081 ]  [Save port]
-                         [Rotate token] [Refresh]
-
-Authorized LAN links
-http://192.168.1.10:3081/?token=xxxx...  [Copy]
-http://10.0.0.8:3081/?token=xxxx...       [Copy]
-
-Local verification link
-http://127.0.0.1:3081/?token=xxxx...
-```
-
-### 开启访问
-
-勾选 **Enable persistent LAN access** 后，插件会：
-
-1. 首次自动生成 256-bit 随机 token；
-2. 持久保存开关、端口和 token；
-3. 默认监听 `0.0.0.0:3081`；
-4. 自动识别可用的 LAN IPv4 地址；
-5. 在设置卡片中显示完整授权链接。
-
-### 远端设备首次访问
-
-在同一局域网的电脑或手机上打开完整链接：
-
-```text
-http://192.168.1.10:3081/?token=<完整令牌>
-```
-
-网关验证 token 后会写入一个有效期 30 天的 HttpOnly Cookie，并跳转到不带 token 的首页。之后同一浏览器可以直接访问：
-
-```text
-http://192.168.1.10:3081/
-```
-
-只要 Cookie 未清除或过期、插件仍为开启状态、DSH 正在运行且 token 未换发，就不需要再次输入完整链接。
-
-### 跨 DSH 重启
-
-插件不是脱离 DSH 独立运行的 Windows 服务；DSH 退出时网关也会关闭。但设置是持久的：
-
-- 开关保持开启时，下一次启动 DSH 会自动恢复网关；
-- 恢复时继续使用同一端口和 token；
-- 原授权链接仍然有效；
-- 远端浏览器中未过期的 Cookie 仍然有效。
-
-因此正常使用时只需开启一次，不需要每次启动都重新生成链接。
-
-### 管理操作
-
-- **Save port**：保存新端口并立即重启网关；token 不变，旧端口停止服务。
-- **Rotate token**：生成新 token；旧链接和旧 Cookie 立即失效。
-- **Refresh**：重新读取运行状态和本机 LAN 地址。
-- **取消开启开关**：立即停止 LAN 监听；token 仍保留，下次开启默认继续使用。
-- 若希望关闭后让所有旧链接永久失效，请在重新开启后执行一次 **Rotate token**。
-
-### 网络路径
-
-```text
-局域网浏览器
-    │  http://LAN-IP:3081 + token / Cookie
-    ▼
-dsh-lan-link 令牌网关
-    │  认证、同源检查、Host/Origin 改写
-    ▼
-127.0.0.1:3080 的原始 DSH Web
-```
-
-LAN 侧不能访问插件自己的 `/lan-link/*` 控制 RPC；修改开关、端口和换发 token 只允许在宿主机的 loopback 设置页面操作。
-
-## ⚠️ 安全风险
-
-启用前请明确理解：
-
-1. **完整 token URL 等同于 DSH 控制权限。** 获取链接的人可以用宿主用户的权限操作 DSH，包括运行可用工具、读写工作区、发起模型调用等。
-2. **token 持久化在本机 DSH Settings 中，属于明文机密。** 插件把该字段标记为 secret，使通用 Settings API 脱敏，但磁盘上的配置并未加密。
-3. **默认使用普通 HTTP。** token、Cookie 和会话内容不会被 TLS 加密；同一不可信网络中的监听者可能窃取它们。
-4. **仅限可信私有局域网。** 不要做公网端口映射，不要暴露到公司访客网、公共 Wi‑Fi 或不受信任 VLAN。
-5. Windows 防火墙可能在首次监听时弹出授权；只允许“专用网络”，不要允许“公用网络”。
-6. token 用户拥有完整 DSH 使用能力，而不是只读权限；应把完整链接视为密码。
-
-如果链接可能泄露，请立即点击 **Rotate token**；如果不需要远程访问，请关闭开关。跨公网或不可信网络使用时，请优先选择 Tailscale、WireGuard、SSH 隧道或带 HTTPS 的反向代理。
-
-## 版本兼容性
-
-当前 `0.1.x` 分支专门面向并测试于：
-
-- DeepSeek Harness CLI：`0.1.1-rc.2`
-- DSH Client/Host 公共插件接口：`0.1.1-rc.2`
-- Node.js：`>=22.19.0`
-
-`package.json` 使用精确的 `dsh.engines.dsh` 和 DSH peer 版本，避免 pnpm 自动解析到 `0.1.2-alpha/rc` 系列。插件不依赖新版原生 `launchToken`，令牌认证由自身网关完成。
-
-安装前可以确认当前版本：
-
-```powershell
-dsh --version
-# 预期：0.1.1-rc.2
-```
+本插件以实际全局 `dsh --version` 和安装目录为基线，而不是旧源码 checkout。`package.json` 中的 `dsh.engines.dsh` 精确声明为 `0.1.5-rc.1`。
 
 ## 安装
-
-从 GitHub checkout 安装到 Web profile：
 
 ```powershell
 git clone https://github.com/advance-lion/dsh-lan-link.git
@@ -144,7 +28,7 @@ cd dsh-lan-link
 dsh plugin --profile web add .
 ```
 
-然后重启当前 `dsh web` 进程。进入 **设置 → 插件 → 插件配置**，找到 **LAN Link**。
+然后重启当前 `dsh web` 进程。
 
 卸载：
 
@@ -152,35 +36,86 @@ dsh plugin --profile web add .
 dsh plugin --profile web remove dsh-lan-link
 ```
 
-## 设置行为
+## 使用
 
-- 初始状态：关闭
-- 默认网关端口：`3081`
-- token：第一次开启时自动生成 256-bit 随机值
-- Cookie：HttpOnly、SameSite=Lax、30 天
-- 开启后：监听 `0.0.0.0:<gateway-port>`，转发到当前 DSH Web 的回环端口
-- 端口被占用：保持 `enabled: true`，但卡片显示启动失败；修改端口后会立即重试
+进入：
 
-持久设置大致如下（token 已省略）：
+**设置 → 插件 → 插件配置 → LAN Link**
 
-```yaml
-lan-link:
-  enabled: true
-  port: 3081
-  token: "..."
-```
+设置卡提供：
 
-## 与原生 `launchToken` 的关系
+1. **Enable LAN access after restart**：保存是否允许 LAN 访问；
+2. **DSH Web port**：保存下次启动使用的 Web 端口，默认 `3080`；
+3. 当前实际绑定地址与端口；
+4. 是否需要重启；
+5. DSH 原生的完整 token 授权链接；
+6. 安全风险提示。
 
-部分 DSH 版本可能提供原生 `connection.launchToken`。当前验证目标版本没有这一配置；如果盲目添加该字段，可能被忽略并造成无认证暴露。本插件因此使用独立令牌网关，不依赖 `launchToken`。
+### 为什么修改后要重启
 
-## 开发与验证
+DSH 0.1.5 的 WebServer 在进程启动时绑定监听地址，不能在运行中把 `127.0.0.1` 安全热切换为 `0.0.0.0`。因此开关和端口使用 `applies: restart`：设置立即持久化，但重启 `dsh web` 后生效。
+
+- 关闭：绑定 `127.0.0.1`，仅本机访问；
+- 开启：绑定 `0.0.0.0`，由 DSH Web Runtime 自动发现 LAN IPv4 并加入 `trustedHosts`；
+- 显式命令行 `--host` / `--port` 仍优先于插件设置，方便临时覆盖。
+
+## 原生授权流程
+
+1. 开启 LAN 并重启 DSH；
+2. 设置卡或启动日志显示类似：
+
+   ```text
+   http://192.168.1.20:3080/?token=...
+   ```
+
+3. 远程浏览器第一次打开完整链接；
+4. DSH 原生 `BrowserAuth` 校验该进程的随机 token；
+5. 成功后返回重定向，并写入绑定 hostname 和 port 的签名 Cookie；
+6. 此后可直接访问不含 token 的干净 URL；
+7. Cookie 默认有效 30 天。
+
+launch token 每次 DSH 启动都会变化。Cookie 签名密钥保存在 `$DSH_HOME/.credentials.yaml`，所以已经授权的浏览器 Cookie 可以跨 DSH 重启继续使用，直到过期、清除浏览器 Cookie，或删除/替换对应 credential 后重启。
+
+## 安全边界
+
+- 完整 token URL 等同于 DSH 完整操作权限，不是只读链接；
+- 原生 Cookie 为 HttpOnly、Host-only、`Path=/`、`SameSite=Strict`；
+- Cookie 绑定 hostname 和 port，换 IP、主机名或端口后需要重新授权；
+- 普通 HTTP 不加密，局域网内具备嗅探能力的攻击者可能看到流量；
+- Host、Origin 和 `sec-fetch-site` 仍由 DSH 原生信任栅栏检查；
+- 不要把端口映射到公网，不要在公共 Wi-Fi 上开启；
+- Windows 防火墙提示时只允许“专用网络”，不要允许“公用网络”；
+- 跨公网访问应使用 Tailscale、WireGuard、SSH 隧道或 HTTPS 反向代理。
+
+如果需要撤销某个浏览器：清除其 Cookie。若要撤销全部已授权浏览器，需要删除或替换 `client-connection/browser-session` credential 并重启 DSH。
+
+## 实现结构
+
+- `lib/config.js`：在 WebServer 绑定前读取并注册持久设置，提供启动快照；
+- `cordis.patch.yml`：让原生 WebServer 根据快照选择 loopback/LAN 地址，并保持 DSH 原生 Connection 认证；
+- `lib/index.js`：向已认证设置页返回原生授权链接并处理配置写入；
+- `lib/client.js`：Settings → Plugins 中的配置卡。
+
+插件没有自建 HTTP/WebSocket 代理，也没有自行存储长期 token。
+
+## 验证
+
+已在全局 DSH `0.1.5-rc.1` 上完成真实测试：
+
+- 空白 profile 本地安装与 Cordis 配置合成；
+- loopback 模式启动；
+- LAN 模式绑定 `0.0.0.0`；
+- 未认证 LAN 请求返回 `401`；
+- 原生 token 交换返回重定向并设置 Cookie；
+- Cookie 后页面返回 `200` 且包含 `window.__DSH_BOOT__`；
+- DSH 重启、launch token 变化后，旧签名 Cookie 仍可访问；
+- 代理层单元测试已删除，因为 0.2.0 不再包含自建代理。
+
+开发检查：
 
 ```powershell
-npm test
+pnpm test
 npm pack --dry-run
-dsh plugin --profile web add .
-dsh --profile web --dump-config
 ```
 
 ## License

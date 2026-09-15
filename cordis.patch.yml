@@ -1,4 +1,26 @@
-# Add the LAN Link host plugin. Its browser half is discovered from ./client.
+# dsh-lan-link for DSH 0.1.5-rc.1.
+# Read the persisted setting before WebServer binds, then let DSH's native
+# Web runtime derive trusted LAN addresses and own token/cookie authentication.
+- insert:
+    - id: lan-link-config
+      name: dsh-lan-link/config
+
+- id: webserver
+  inject: [webStartup, lanLinkConfig]
+  config:
+    host: !!js ctx.webStartup.host ?? ctx.lanLinkConfig.host
+    port: !!js ctx.webStartup.port ?? ctx.lanLinkConfig.port
+    compression: gzip
+    compressionLevel: 1
+    compressionThresholdBytes: 1024
+
+- id: connection
+  inject: [webRuntime]
+  config:
+    trustedHosts: !!js ctx.webRuntime.trustedHosts
+    cookieMaxAgeDays: 30
+
 - insert:
     - id: lan-link
       name: dsh-lan-link
+      inject: [settings, connection, webServer, webRuntime, lanLinkConfig]
