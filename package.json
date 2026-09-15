@@ -1,6 +1,6 @@
 {
   "name": "dsh-lan-link",
-  "version": "0.2.1",
+  "version": "0.2.2-rc.2.0",
   "description": "Persistent token-gated LAN access for DeepSeek Harness Web",
   "homepage": "https://github.com/advance-lion/dsh-lan-link#readme",
   "repository": {
@@ -26,7 +26,7 @@
   ],
   "dsh": {
     "engines": {
-      "dsh": "0.1.5-rc.1"
+      "dsh": "0.1.5-rc.2"
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -44,6 +44,7 @@
   },
   "scripts": {
     "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "test:compat": "node scripts/compat-smoke.mjs",
     "check": "npm test && npm pack --dry-run",
     "prepack": "npm test"
   },
@@ -68,6 +69,13 @@
     "react": "18.3.1"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true }
-  }
+    "react": {
+      "optional": true
+    }
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "author": ""
 }

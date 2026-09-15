@@ -1,6 +1,6 @@
 # dsh-lan-link
 
-为 DeepSeek Harness Web 提供可持久开启的局域网访问入口，面向当前 **DSH `0.1.5-rc.1`**。
+为 DeepSeek Harness Web 提供可持久开启的局域网访问入口。本兼容分支面向 **DSH `0.1.5-rc.2`**；稳定主线 `main` 仍以 DSH `0.1.5-rc.1` 为主要支持目标。
 
 插件不实现第二套反向代理或自定义认证，而是配置并展示 DSH 0.1.5 自带的：
 
@@ -14,11 +14,11 @@
 
 | 项目 | 版本 |
 | --- | --- |
-| DeepSeek Harness CLI | `0.1.5-rc.1` |
-| 插件 | `0.2.0` |
+| DeepSeek Harness CLI | `0.1.5-rc.2` |
+| 插件 | `0.2.2-rc.2.0` |
 | Node.js | `>=22.19.0` |
 
-本插件以实际全局 `dsh --version` 和安装目录为基线，而不是旧源码 checkout。`package.json` 中的 `dsh.engines.dsh` 精确声明为 `0.1.5-rc.1`。
+本兼容版本使用隔离安装的官方 `@deepseek-ai/dsh@0.1.5-rc.2` 完成验证，不会升级本机正在使用的 rc.1。`package.json` 中的 `dsh.engines.dsh` 精确声明为 `0.1.5-rc.2`。需要 rc.1 时请继续使用 `main` 分支和 `v0.2.1`。
 
 ## 安装
 

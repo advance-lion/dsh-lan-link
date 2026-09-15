@@ -7,8 +7,14 @@ coverage/
 .compat-test-home/
 .rc15-test-home/
 .rc15-dump.txt
+.rc2-toolchain/
+.rc2-test-home/
+.rc2-cookie.txt
+.compat-toolchain/
+.compat-home/
 .test-*.txt
 tests/e2e-client.mjs
 tests/compat-e2e.mjs
 tests/native-auth-e2e.mjs
+tests/rc2-auth-e2e.mjs
 .rc15-cookie.txt
