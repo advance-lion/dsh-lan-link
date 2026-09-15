@@ -121,6 +121,14 @@ pnpm test
 npm pack --dry-run
 ```
 
+## 版本维护与上游跟踪
+
+- `main` 与 `v0.2.1`：主要支持 DSH `0.1.5-rc.1`；
+- `compat/dsh-0.1.5-rc.2` 与 `v0.2.2-rc.2.0`：经隔离端到端验证的 DSH `0.1.5-rc.2` 兼容预发布；
+- `compatibility.json` 记录主版本与已验证组合；
+- GitHub Actions 对每个分支按其 `dsh.engines.dsh` 安装官方 DSH 并执行原生认证 smoke test；
+- 每周检查 DeepSeek Harness Releases，发现尚未验证的新版本时自动创建兼容性 Issue。新版本不会未经测试自动发布。
+
 ## License
 
 MIT

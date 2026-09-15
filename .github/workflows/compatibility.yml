@@ -1,0 +1,22 @@
+name: DSH compatibility
+
+on:
+  push:
+    branches: [main, compat/dsh-0.1.5-rc.2]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0'
+          cache: npm
+      - run: npm install -g pnpm@11.23.0
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm test
+      - run: node scripts/compat-smoke.mjs

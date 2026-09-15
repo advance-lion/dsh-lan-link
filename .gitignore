@@ -12,3 +12,5 @@ tests/e2e-client.mjs
 tests/compat-e2e.mjs
 tests/native-auth-e2e.mjs
 .rc15-cookie.txt
+.compat-toolchain/
+.compat-home/

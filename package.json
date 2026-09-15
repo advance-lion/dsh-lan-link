@@ -44,6 +44,7 @@
   },
   "scripts": {
     "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "test:compat": "node scripts/compat-smoke.mjs",
     "check": "npm test && npm pack --dry-run",
     "prepack": "npm test"
   },
