@@ -15,10 +15,10 @@
 | 项目 | 版本 |
 | --- | --- |
 | DeepSeek Harness CLI | `0.1.5-rc.2` |
-| 插件 | `0.2.2-rc.2.1` |
+| 插件 | `0.2.3-rc.2.2` |
 | Node.js | `>=22.19.0` |
 
-本兼容版本使用隔离安装的官方 `@deepseek-ai/dsh@0.1.5-rc.2` 完成验证，不会升级本机正在使用的 rc.1。`package.json` 中的 `dsh.engines.dsh` 精确声明为 `0.1.5-rc.2`。需要 rc.1 时请继续使用 `main` 分支和 `v0.2.2`。
+本兼容版本使用隔离安装的官方 `@deepseek-ai/dsh@0.1.5-rc.2` 完成验证，不会升级本机正在使用的 rc.1。`package.json` 中的 `dsh.engines.dsh` 精确声明为 `0.1.5-rc.2`。需要 rc.1 时请继续使用 `main` 分支和 `v0.2.3`。
 
 ## 安装
 
