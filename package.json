@@ -1,6 +1,6 @@
 {
   "name": "dsh-lan-link",
-  "version": "0.2.4-rc.2.3",
+  "version": "0.2.5-rc.2.4",
   "description": "为 DeepSeek Harness Web 提供基于令牌认证的持久局域网访问",
   "homepage": "https://github.com/advance-lion/dsh-lan-link#readme",
   "repository": {
