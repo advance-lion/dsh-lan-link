@@ -123,8 +123,8 @@ npm pack --dry-run
 
 ## 版本维护与上游跟踪
 
-- `main` 与 `v0.2.4`：主要支持 DSH `0.1.5-rc.1`，设置卡提供完整中文界面，保存端口前自动检测冲突；
-- `compat/dsh-0.1.5-rc.2` 与 `v0.2.4-rc.2.3`：经隔离端到端验证的 DSH `0.1.5-rc.2` 中文兼容预发布；
+- `main` 与 `v0.2.5`：主要支持 DSH `0.1.5-rc.1`，设置卡提供完整中文界面、清晰的局域网访问开关，保存端口前自动检测冲突；
+- `compat/dsh-0.1.5-rc.2` 与 `v0.2.5-rc.2.4`：经隔离端到端验证的 DSH `0.1.5-rc.2` 中文兼容预发布；
 - `compatibility.json` 记录主版本与已验证组合；
 - GitHub Actions 对每个分支按其 `dsh.engines.dsh` 安装官方 DSH 并执行原生认证 smoke test；
 - 每周检查 DeepSeek Harness Releases，发现尚未验证的新版本时自动创建兼容性 Issue。新版本不会未经测试自动发布。

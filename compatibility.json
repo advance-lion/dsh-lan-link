@@ -1,18 +1,18 @@
 {
   "primary": {
     "dsh": "0.1.5-rc.1",
-    "plugin": "0.2.4",
+    "plugin": "0.2.5",
     "ref": "main"
   },
   "tested": [
     {
       "dsh": "0.1.5-rc.1",
-      "plugin": "0.2.4",
+      "plugin": "0.2.5",
       "ref": "main"
     },
     {
       "dsh": "0.1.5-rc.2",
-      "plugin": "0.2.4-rc.2.3",
+      "plugin": "0.2.5-rc.2.4",
       "ref": "compat/dsh-0.1.5-rc.2"
     }
   ]
